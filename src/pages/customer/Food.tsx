@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search, Star, Clock, ChevronRight, ShoppingCart, Plus, Minus, X, ArrowLeft } from 'lucide-react'
+import { Search, Star, Clock, ChevronRight, ShoppingCart, Plus, Minus, X, ArrowLeft, Heart } from 'lucide-react'
 import BottomNav from '../../components/BottomNav'
 import Header from '../../components/Header'
 import { getCurrentUser, addOrder, getRestaurantMenuItems, type MenuItem } from '../../store'
@@ -28,6 +28,8 @@ export default function CustomerFood() {
   const [showCart, setShowCart] = useState(false)
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [payment, setPayment] = useState<'COD' | 'GCASH'>('COD')
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [, setMenuVersion] = useState(0)
 
   useEffect(() => {
@@ -36,10 +38,13 @@ export default function CustomerFood() {
     return () => window.removeEventListener('menu-items-updated', refreshMenu as EventListener)
   }, [])
 
-  const filtered = RESTAURANTS.filter(r =>
-    (category === 'All' || r.category === category) &&
-    r.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = RESTAURANTS.filter(r => {
+    const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase())
+    const matchesCategory = category === 'All' || r.category === category
+    const isFavorite = favorites.includes(r.id)
+    const matchesFavoriteFilter = !showFavoritesOnly || isFavorite
+    return matchesSearch && matchesCategory && matchesFavoriteFilter
+  })
 
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0)
   const cartCount = cart.reduce((s, i) => s + i.qty, 0)
@@ -78,6 +83,10 @@ export default function CustomerFood() {
     })
     setOrderPlaced(true)
     setTimeout(() => { setOrderPlaced(false); setShowCart(false); setCart([]) }, 3000)
+  }
+
+  function toggleFavorite(id: string) {
+    setFavorites(curr => curr.includes(id) ? curr.filter(f => f !== id) : [...curr, id])
   }
 
   function openRestaurant(r: typeof RESTAURANTS[0]) {
@@ -224,40 +233,57 @@ export default function CustomerFood() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search restaurants..." className="w-full h-11 pl-10 pr-4 border-2 border-[#CBD5E1] focus:border-[#E11D48] rounded-xl text-sm font-medium outline-none transition-colors bg-white" />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 pb-1">
-          {CATEGORIES.map(c => (
-            <button key={c} onClick={() => setCategory(c)} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95 ${category === c ? 'bg-[#E11D48] text-white shadow-md' : 'bg-white border-2 border-[#E2E8F0] text-[#64748B]'}`}>
-              {c}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4 pb-1">
+          <button
+            onClick={() => setShowFavoritesOnly(v => !v)}
+            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all active:scale-95 ${showFavoritesOnly ? 'border-[#E11D48] bg-red-50 text-[#E11D48]' : 'border-[#E2E8F0] bg-white text-[#64748B]'}`}
+            aria-label="Show favorites only"
+          >
+            <Heart size={18} className={showFavoritesOnly ? 'fill-current' : ''} />
+          </button>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => setCategory(c)} className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95 ${category === c ? 'bg-[#E11D48] text-white shadow-md' : 'bg-white border-2 border-[#E2E8F0] text-[#64748B]'}`}>
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-4">
           {filtered.map(r => (
-            <button key={r.id} onClick={() => openRestaurant(r)} className="w-full bg-white rounded-2xl border-2 border-[#E2E8F0] overflow-hidden text-left active:scale-[0.98] transition-all hover:shadow-md">
-              <div className="h-36 relative overflow-hidden" style={{ backgroundColor: r.color }}>
-                <img src={`https://images.unsplash.com/${r.img}?w=600&h=300&fit=crop&auto=format`} alt={r.name} className="w-full h-full object-cover" />
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-                  <Star size={11} className="text-[#F59E0B] fill-[#F59E0B]" />
-                  <span className="text-xs font-bold text-[#121212]">{r.rating}</span>
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-[#121212] text-base">{r.name}</h3>
-                    <div className="flex items-center gap-3 text-[#64748B] text-xs mt-1">
-                      <span className="flex items-center gap-1"><Clock size={11} />{r.time}</span>
-                      <span>Delivery ₱{r.fee}</span>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-[#CBD5E1] mt-0.5" />
-                </div>
-                <div className="flex gap-1.5 mt-3 flex-wrap">
-                  {r.tags.map(t => <span key={t} className="text-xs font-medium px-2 py-0.5 bg-[#F8F9FA] text-[#64748B] rounded-full border border-[#E2E8F0]">{t}</span>)}
-                </div>
-              </div>
-            </button>
+            <div key={r.id} className="w-full bg-white rounded-2xl border-2 border-[#E2E8F0] overflow-hidden text-left hover:shadow-md">
+             <button onClick={() => openRestaurant(r)} className="w-full text-left active:scale-[0.98] transition-all">
+               <div className="h-36 relative overflow-hidden" style={{ backgroundColor: r.color }}>
+                 <img src={`https://images.unsplash.com/${r.img}?w=600&h=300&fit=crop&auto=format`} alt={r.name} className="w-full h-full object-cover" />
+                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                   <Star size={11} className="text-[#F59E0B] fill-[#F59E0B]" />
+                   <span className="text-xs font-bold text-[#121212]">{r.rating}</span>
+                 </div>
+               </div>
+               <div className="p-4">
+                 <div className="flex items-start justify-between">
+                   <div>
+                     <h3 className="font-bold text-[#121212] text-base">{r.name}</h3>
+                     <div className="flex items-center gap-3 text-[#64748B] text-xs mt-1">
+                       <span className="flex items-center gap-1"><Clock size={11} />{r.time}</span>
+                       <span>Delivery ₱{r.fee}</span>
+                     </div>
+                   </div>
+                   <ChevronRight size={20} className="text-[#CBD5E1] mt-0.5" />
+                 </div>
+                 <div className="flex gap-1.5 mt-3 flex-wrap">
+                   {r.tags.map(t => <span key={t} className="text-xs font-medium px-2 py-0.5 bg-[#F8F9FA] text-[#64748B] rounded-full border border-[#E2E8F0]">{t}</span>)}
+                 </div>
+               </div>
+             </button>
+             <div className="border-t border-[#E2E8F0] p-3 flex items-center justify-between">
+               <span className="text-xs font-semibold text-[#64748B]">{favorites.includes(r.id) ? 'Favorite' : 'Not favorite'}</span>
+               <button onClick={() => toggleFavorite(r.id)} className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all active:scale-95 ${favorites.includes(r.id) ? 'border-[#E11D48] bg-red-50 text-[#E11D48]' : 'border-[#E2E8F0] bg-white text-[#64748B]'}`}>
+                 <Heart size={16} className={favorites.includes(r.id) ? 'fill-current' : ''} />
+               </button>
+             </div>
+            </div>
           ))}
         </div>
       </div>

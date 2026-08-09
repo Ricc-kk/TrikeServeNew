@@ -105,6 +105,7 @@ const KEY_REQUESTS = 'trikeserve_ride_requests'
 const KEY_ACTIVE_RIDE = 'trikeserve_active_ride'
 const KEY_HISTORY_PREFIX = 'ride_history_'
 const KEY_ORDERS = 'trikeserve_orders'
+const KEY_RESTAURANT_MENU = 'trikeserve_restaurant_menu'
 
 // --------------------------------------------------------------------------
 // Food orders + delivery dispatch (GrabFood-style pipeline)
@@ -116,6 +117,17 @@ export interface OrderItem {
   name: string
   qty: number
   price: number
+}
+
+export type MenuBadge = 'Best Seller' | 'Signature Dish'
+
+export interface MenuItem {
+  id: string
+  name: string
+  price: number
+  category: string
+  available: boolean
+  badge?: MenuBadge | null
 }
 
 export interface Order {
@@ -136,6 +148,41 @@ export interface Order {
 
 const minutesAgo = (n: number) => new Date(Date.now() - n * 60_000).toISOString()
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString()
+
+const SEED_MENU_ITEMS: Record<string, MenuItem[]> = {
+  r1: [
+    { id: 'mi1', name: 'Pork Adobo + Rice', price: 85, category: 'Rice Meals', available: true, badge: 'Best Seller' },
+    { id: 'mi2', name: 'Sinigang na Baboy', price: 95, category: 'Soup', available: true, badge: 'Signature Dish' },
+    { id: 'mi3', name: 'Kare-Kare', price: 120, category: 'Specialty', available: true },
+    { id: 'mi4', name: 'Pancit Canton', price: 75, category: 'Noodles', available: false },
+    { id: 'mi5', name: 'Halo-Halo', price: 65, category: 'Dessert', available: true },
+  ],
+}
+
+export function getRestaurantMenuItems(restaurantId: string): MenuItem[] {
+  const raw = localStorage.getItem(KEY_RESTAURANT_MENU)
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as Record<string, MenuItem[]>
+      const items = parsed[restaurantId]
+      if (Array.isArray(items)) return items
+    } catch { /* fall through to seeded items */ }
+  }
+  return [...(SEED_MENU_ITEMS[restaurantId] ?? [])]
+}
+
+export function saveRestaurantMenuItems(restaurantId: string, items: MenuItem[]) {
+  let parsed: Record<string, MenuItem[]> = {}
+  const raw = localStorage.getItem(KEY_RESTAURANT_MENU)
+  if (raw) {
+    try { parsed = JSON.parse(raw) as Record<string, MenuItem[]> } catch { parsed = {} }
+  }
+  parsed[restaurantId] = items
+  const value = JSON.stringify(parsed)
+  localStorage.setItem(KEY_RESTAURANT_MENU, value)
+  notifyStorage(KEY_RESTAURANT_MENU, value)
+  window.dispatchEvent(new CustomEvent('menu-items-updated', { detail: { restaurantId, items } }))
+}
 
 const SEED_ORDERS: Order[] = [
   { id: 'o1', restaurantName: "Aling Nena's Carinderia", customerId: 'u1', customerName: 'Maria Santos', items: [{ name: 'Pork Adobo + Rice', qty: 2, price: 85 }, { name: 'Sinigang na Baboy', qty: 1, price: 95 }], subtotal: 265, deliveryFee: 15, total: 280, payment: 'COD', status: 'received', createdAt: minutesAgo(2) },

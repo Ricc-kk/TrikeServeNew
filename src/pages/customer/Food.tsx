@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Search, Star, Clock, ChevronRight, ShoppingCart, Plus, Minus, X, ArrowLeft } from 'lucide-react'
 import BottomNav from '../../components/BottomNav'
 import Header from '../../components/Header'
-import { getCurrentUser, addOrder } from '../../store'
+import { getCurrentUser, addOrder, getRestaurantMenuItems, type MenuItem } from '../../store'
 
 const CATEGORIES = ['All', 'Filipino', 'Fast Food', 'Rice Meals', 'Snacks', 'Drinks']
+
+const BADGE_STYLES: Record<NonNullable<MenuItem['badge']>, string> = {
+  'Best Seller': 'bg-amber-100 text-amber-700',
+  'Signature Dish': 'bg-violet-100 text-violet-700',
+}
 
 const RESTAURANTS = [
   { id: 'r1', name: 'Aling Nena\'s Carinderia', category: 'Filipino', rating: 4.8, time: '15-20 min', fee: 15, img: 'photo-1567620905732-2d1ec7ab7445', tags: ['Adobo', 'Sinigang', 'Kare-Kare'], color: '#FEF3C7' },
@@ -12,30 +17,6 @@ const RESTAURANTS = [
   { id: 'r3', name: 'Jollibee Valenzuela', category: 'Fast Food', rating: 4.5, time: '10-15 min', fee: 25, img: 'photo-1568901346375-23c9450c58cd', tags: ['Burger', 'Chickenjoy', 'Spaghetti'], color: '#FEE2E2' },
   { id: 'r4', name: 'Tapsilog Express', category: 'Rice Meals', rating: 4.7, time: '10-20 min', fee: 15, img: 'photo-1540189549336-e6e99c3679fe', tags: ['Tapsilog', 'Tocilog', 'Longsilog'], color: '#D1FAE5' },
 ]
-
-const MENU: Record<string, { id: string; name: string; price: number; desc: string; category: string }[]> = {
-  r1: [
-    { id: 'm1', name: 'Pork Adobo + Rice', price: 85, desc: 'Classic Filipino pork adobo with steamed white rice', category: 'Rice Meals' },
-    { id: 'm2', name: 'Sinigang na Baboy', price: 95, desc: 'Sour tamarind soup with pork and vegetables', category: 'Soup' },
-    { id: 'm3', name: 'Kare-Kare', price: 120, desc: 'Oxtail stew in peanut sauce with bagoong', category: 'Specialty' },
-    { id: 'm4', name: 'Pancit Canton', price: 75, desc: 'Stir-fried noodles with vegetables and pork', category: 'Noodles' },
-    { id: 'm5', name: 'Halo-Halo', price: 65, desc: 'Shaved ice dessert with mixed fruits and leche flan', category: 'Drinks' },
-  ],
-  r2: [
-    { id: 'm6', name: 'Inihaw na Liempo', price: 110, desc: 'Grilled pork belly with soy-calamansi marinade', category: 'Grill' },
-    { id: 'm7', name: 'BBQ Pork Skewer', price: 25, desc: 'Sweet and savory pork BBQ on bamboo skewer (per stick)', category: 'Grill' },
-    { id: 'm8', name: 'Grilled Bangus', price: 130, desc: 'Whole milkfish stuffed with onions and tomatoes', category: 'Grill' },
-  ],
-  r3: [
-    { id: 'm9', name: 'Chickenjoy 2pc', price: 155, desc: 'Crispy fried chicken with Jolly Spaghetti', category: 'Chicken' },
-    { id: 'm10', name: 'Yumburger', price: 65, desc: 'Classic burger with sweet-style Jollibee patty', category: 'Burger' },
-  ],
-  r4: [
-    { id: 'm11', name: 'Tapsilog', price: 95, desc: 'Beef tapa, sinangag, at itlog (fried egg)', category: 'Silog' },
-    { id: 'm12', name: 'Tocilog', price: 90, desc: 'Sweet pork tocino, garlic rice, fried egg', category: 'Silog' },
-    { id: 'm13', name: 'Longsilog', price: 85, desc: 'Pork longganisa, garlic rice, fried egg', category: 'Silog' },
-  ],
-}
 
 interface CartItem { id: string; name: string; price: number; qty: number }
 
@@ -47,6 +28,13 @@ export default function CustomerFood() {
   const [showCart, setShowCart] = useState(false)
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [payment, setPayment] = useState<'COD' | 'GCASH'>('COD')
+  const [, setMenuVersion] = useState(0)
+
+  useEffect(() => {
+    const refreshMenu = () => setMenuVersion(v => v + 1)
+    window.addEventListener('menu-items-updated', refreshMenu as EventListener)
+    return () => window.removeEventListener('menu-items-updated', refreshMenu as EventListener)
+  }, [])
 
   const filtered = RESTAURANTS.filter(r =>
     (category === 'All' || r.category === category) &&
@@ -102,7 +90,7 @@ export default function CustomerFood() {
   }
 
   if (activeRestaurant) {
-    const menu = MENU[activeRestaurant.id] || []
+    const menu = getRestaurantMenuItems(activeRestaurant.id)
     return (
       <div className="min-h-screen bg-[#F8F9FA] pb-24">
         <div className="relative h-48 overflow-hidden">
@@ -127,8 +115,15 @@ export default function CustomerFood() {
             return (
               <div key={item.id} className="bg-white rounded-xl border-2 border-[#E2E8F0] p-4 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[#121212] text-sm">{item.name}</p>
-                  <p className="text-[#64748B] text-xs mt-0.5 line-clamp-1">{item.desc}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-bold text-[#121212] text-sm">{item.name}</p>
+                    {item.badge && (
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${BADGE_STYLES[item.badge]}`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[#64748B] text-xs mt-0.5 line-clamp-1">{item.category}</p>
                   <p className="text-[#E11D48] font-extrabold text-base mt-1">₱{item.price}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

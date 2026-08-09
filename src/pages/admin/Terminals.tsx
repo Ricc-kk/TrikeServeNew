@@ -92,13 +92,13 @@ export default function AdminTerminals() {
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
       <AdminSidebar />
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="flex items-center justify-between mb-6">
+      <main className="flex-1 overflow-auto p-4 pt-20 sm:p-6 md:pt-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-2xl font-extrabold text-[#121212]" style={{ letterSpacing: '-0.02em' }}>Terminal Management</h2>
-            <p className="text-[#64748B] text-sm mt-1">{terminals.length} terminals · {riders.length} drivers</p>
+            <p className="mt-1 text-sm text-[#64748B]">{terminals.length} terminals · {riders.length} drivers</p>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-sm uppercase tracking-wide rounded-xl transition-all active:scale-95 shadow-lg shadow-red-200">
+          <button onClick={openCreate} className="flex items-center justify-center gap-2 rounded-xl bg-[#E11D48] px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-red-200 transition-all hover:bg-[#BE123C] active:scale-95">
             <Plus size={16} /> New Terminal
           </button>
         </div>
@@ -111,34 +111,34 @@ export default function AdminTerminals() {
             return (
               <div key={t.id} className="bg-white rounded-2xl border-2 border-[#E2E8F0] overflow-hidden">
                 <div className="p-5">
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-start gap-3">
-                      <div className="w-11 h-11 bg-[#DBEAFE] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#DBEAFE]">
                         <MapPin size={20} className="text-[#3B82F6]" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-[#121212] text-lg">🚏 {t.name}</h3>
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${t.is_active ? 'bg-green-100 text-green-700' : 'bg-[#F8F9FA] text-[#64748B]'}`}>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-bold text-[#121212]">🚏 {t.name}</h3>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${t.is_active ? 'bg-green-100 text-green-700' : 'bg-[#F8F9FA] text-[#64748B]'}`}>
                             {t.is_active ? '● Active' : '○ Inactive'}
                           </span>
                         </div>
-                        <p className="text-[#64748B] text-sm mt-0.5">📍 {t.boundary}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-[#64748B]">
+                        <p className="mt-0.5 text-sm text-[#64748B]">📍 {t.boundary}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[#64748B]">
                           <span className="flex items-center gap-1"><Users size={12} />{termRiders.length} drivers</span>
                           <span>Radius {t.radius_km}km</span>
                           <span>({t.center_lat.toFixed(4)}, {t.center_lng.toFixed(4)})</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button onClick={() => setExpandedId(isExpanded ? null : t.id)} className="px-3 py-1.5 text-xs font-semibold text-[#3B82F6] bg-[#DBEAFE] rounded-lg hover:bg-blue-200 transition-all">
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
+                      <button onClick={() => setExpandedId(isExpanded ? null : t.id)} className="rounded-lg bg-[#DBEAFE] px-3 py-1.5 text-xs font-semibold text-[#3B82F6] transition-all hover:bg-blue-200">
                         {isExpanded ? 'Hide' : 'Drivers'}
                       </button>
-                      <button onClick={() => openEdit(t)} className="w-8 h-8 bg-[#F8F9FA] border-2 border-[#E2E8F0] rounded-xl flex items-center justify-center hover:border-[#3B82F6] transition-all active:scale-90">
+                      <button onClick={() => openEdit(t)} className="flex h-8 w-8 items-center justify-center rounded-xl border-2 border-[#E2E8F0] bg-[#F8F9FA] transition-all hover:border-[#3B82F6] active:scale-90">
                         <Edit2 size={14} className="text-[#64748B]" />
                       </button>
-                      <button onClick={() => deleteTerminal(t.id)} className="w-8 h-8 bg-red-50 border-2 border-red-100 rounded-xl flex items-center justify-center hover:border-red-300 transition-all active:scale-90">
+                      <button onClick={() => deleteTerminal(t.id)} className="flex h-8 w-8 items-center justify-center rounded-xl border-2 border-red-100 bg-red-50 transition-all hover:border-red-300 active:scale-90">
                         <Trash2 size={14} className="text-[#EF4444]" />
                       </button>
                     </div>
@@ -146,14 +146,14 @@ export default function AdminTerminals() {
                 </div>
 
                 {isExpanded && (
-                  <div className="border-t-2 border-[#E2E8F0] p-5 bg-[#F8F9FA]">
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B] mb-3">Assigned Drivers ({termRiders.length})</h4>
-                    <div className="space-y-2 mb-4">
-                      {termRiders.length === 0 && <p className="text-sm text-[#64748B] italic">No drivers assigned yet</p>}
+                  <div className="border-t-2 border-[#E2E8F0] bg-[#F8F9FA] p-4 sm:p-5">
+                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#64748B]">Assigned Drivers ({termRiders.length})</h4>
+                    <div className="mb-4 space-y-2">
+                      {termRiders.length === 0 && <p className="text-sm italic text-[#64748B]">No drivers assigned yet</p>}
                       {termRiders.map(r => (
-                        <div key={r.id} className="flex items-center justify-between bg-white rounded-xl border-2 border-[#E2E8F0] px-4 py-2.5">
+                        <div key={r.id} className="flex flex-col gap-2 rounded-xl border-2 border-[#E2E8F0] bg-white px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-[#DBEAFE] rounded-lg flex items-center justify-center text-[#3B82F6] font-bold text-xs">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#DBEAFE] text-xs font-bold text-[#3B82F6]">
                               {r.first_name[0]}{r.last_name[0]}
                             </div>
                             <div>
@@ -161,7 +161,7 @@ export default function AdminTerminals() {
                               <p className="text-xs text-[#64748B]">{r.toda_plate || 'No plate'}</p>
                             </div>
                           </div>
-                          <button onClick={() => unassignRider(r.id, t.id)} className="flex items-center gap-1 text-xs font-semibold text-[#EF4444] bg-red-50 border border-red-100 px-2.5 py-1.5 rounded-lg hover:bg-red-100 transition-all active:scale-95">
+                          <button onClick={() => unassignRider(r.id, t.id)} className="flex items-center justify-center gap-1 rounded-lg border border-red-100 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-[#EF4444] transition-all hover:bg-red-100 active:scale-95">
                             <UserMinus size={12} /> Unassign
                           </button>
                         </div>
@@ -170,13 +170,13 @@ export default function AdminTerminals() {
 
                     {unassigned.length > 0 && (
                       <>
-                        <h4 className="text-xs font-semibold uppercase tracking-wide text-[#64748B] mb-2">Assign Driver</h4>
+                        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#64748B]">Assign Driver</h4>
                         <div className="flex flex-wrap gap-2">
                           {unassigned.map(r => (
                             <button
                               key={r.id}
                               onClick={() => assignRider(r.id, t.id, t.name)}
-                              className="flex items-center gap-2 px-3 py-2 bg-white border-2 border-[#E2E8F0] hover:border-[#10B981] rounded-xl transition-all active:scale-95 text-sm font-medium"
+                              className="flex items-center gap-2 rounded-xl border-2 border-[#E2E8F0] bg-white px-3 py-2 text-sm font-medium transition-all hover:border-[#10B981] active:scale-95"
                             >
                               <UserPlus size={13} className="text-[#10B981]" />
                               {r.first_name} {r.last_name}

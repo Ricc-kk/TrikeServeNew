@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Search, Star, Clock, ChevronRight, ShoppingCart, Plus, Minus, X, ArrowLeft, Heart } from 'lucide-react'
 import BottomNav from '../../components/BottomNav'
 import Header from '../../components/Header'
-import { getCurrentUser, addOrder, getRestaurantMenuItems, type MenuItem } from '../../store'
+import { getCurrentUser, addOrder, getRestaurantMenuItems, getStoreStatus, type MenuItem } from '../../store'
 
 const CATEGORIES = ['All', 'Filipino', 'Fast Food', 'Rice Meals', 'Snacks', 'Drinks']
 
@@ -30,12 +30,17 @@ export default function CustomerFood() {
   const [payment, setPayment] = useState<'COD' | 'GCASH'>('COD')
   const [favorites, setFavorites] = useState<string[]>([])
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [storeClosedMessage, setStoreClosedMessage] = useState<string | null>(null)
   const [, setMenuVersion] = useState(0)
 
   useEffect(() => {
     const refreshMenu = () => setMenuVersion(v => v + 1)
     window.addEventListener('menu-items-updated', refreshMenu as EventListener)
-    return () => window.removeEventListener('menu-items-updated', refreshMenu as EventListener)
+    window.addEventListener('store-status-updated', refreshMenu as EventListener)
+    return () => {
+      window.removeEventListener('menu-items-updated', refreshMenu as EventListener)
+      window.removeEventListener('store-status-updated', refreshMenu as EventListener)
+    }
   }, [])
 
   const filtered = RESTAURANTS.filter(r => {
@@ -50,6 +55,12 @@ export default function CustomerFood() {
   const cartCount = cart.reduce((s, i) => s + i.qty, 0)
 
   function addItem(item: { id: string; name: string; price: number }) {
+    const storeStatus = getStoreStatus(activeRestaurant?.id || 'r1')
+    if (!activeRestaurant || !storeStatus.isOpen) {
+      setStoreClosedMessage('Store is Closed, Wait for the Store to Open')
+      return
+    }
+    setStoreClosedMessage(null)
     setCart(c => {
       const ex = c.find(i => i.id === item.id)
       if (ex) return c.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i)
@@ -98,6 +109,20 @@ export default function CustomerFood() {
     setOrderPlaced(false)
   }
 
+  function addToCart(item: { id: string; name: string; price: number }) {
+    const storeStatus = getStoreStatus(activeRestaurant?.id || 'r1')
+    if (!activeRestaurant || !storeStatus.isOpen) {
+      setStoreClosedMessage('Store is Closed, Wait for the Store to Open')
+      return
+    }
+    setStoreClosedMessage(null)
+    setCart(c => {
+      const ex = c.find(i => i.id === item.id)
+      if (ex) return c.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i)
+      return [...c, { ...item, qty: 1 }]
+    })
+  }
+
   if (activeRestaurant) {
     const menu = getRestaurantMenuItems(activeRestaurant.id)
     return (
@@ -119,6 +144,11 @@ export default function CustomerFood() {
         </div>
 
         <div className="px-4 py-4 space-y-3">
+          {storeClosedMessage && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-[#EF4444]">
+              {storeClosedMessage}
+            </div>
+          )}
           {menu.map(item => {
             const inCart = cart.find(i => i.id === item.id)
             return (

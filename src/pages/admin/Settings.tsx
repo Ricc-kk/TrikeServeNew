@@ -19,14 +19,14 @@ export default function AdminSettings() {
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
       <AdminSidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 overflow-auto p-4 pt-20 sm:p-6 md:pt-6">
         <div className="mb-6">
           <h2 className="text-2xl font-extrabold text-[#121212]" style={{ letterSpacing: '-0.02em' }}>Platform Settings</h2>
-          <p className="text-[#64748B] text-sm mt-1">Fixed rate configuration</p>
+          <p className="mt-1 text-sm text-[#64748B]">Fixed rate configuration</p>
         </div>
 
         {!isRiderAdmin ? (
-          <div className="max-w-md bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 flex flex-col items-center text-center gap-3">
+          <div className="flex max-w-xl flex-col items-center gap-3 rounded-2xl border-2 border-amber-200 bg-amber-50 p-6 text-center">
             <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center">
               <Lock size={24} className="text-amber-600" />
             </div>
@@ -34,13 +34,13 @@ export default function AdminSettings() {
             <p className="text-amber-700 text-sm">Rate settings are only accessible to <strong>Rider Admin</strong> accounts. Contact a rider admin to update pricing.</p>
           </div>
         ) : (
-          <div className="max-w-md">
-            <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] overflow-hidden">
-              <div className="px-5 py-4 border-b-2 border-[#E2E8F0]">
+          <div className="w-full max-w-xl">
+            <div className="overflow-hidden rounded-2xl border-2 border-[#E2E8F0] bg-white">
+              <div className="border-b-2 border-[#E2E8F0] px-5 py-4">
                 <h3 className="font-bold text-[#121212]">Tricycle Rates (₱)</h3>
-                <p className="text-[#64748B] text-xs mt-0.5">Fixed TODA rates across Valenzuela City</p>
+                <p className="mt-0.5 text-xs text-[#64748B]">Fixed TODA rates across Valenzuela City</p>
               </div>
-              <div className="p-5 space-y-4">
+              <div className="space-y-4 p-5">
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wide text-[#64748B] block mb-1.5">Shared Ride Rate</label>
                   <div className="relative">

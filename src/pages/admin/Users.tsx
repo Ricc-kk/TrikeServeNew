@@ -74,38 +74,37 @@ export default function AdminUsers() {
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
       <AdminSidebar />
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 overflow-auto p-4 pt-20 sm:p-6 md:pt-6">
         <div className="mb-6">
           <h2 className="text-2xl font-extrabold text-[#121212]" style={{ letterSpacing: '-0.02em' }}>User Management</h2>
-          <p className="text-[#64748B] text-sm mt-1">{users.length} registered users</p>
+          <p className="mt-1 text-sm text-[#64748B]">{users.length} registered users</p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-5">
-          <div className="relative flex-1 min-w-48">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="relative min-w-0 flex-1 sm:min-w-48">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, phone..." className="w-full h-10 pl-9 pr-4 border-2 border-[#CBD5E1] focus:border-[#E11D48] rounded-xl text-sm outline-none bg-white" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, phone..." className="h-10 w-full rounded-xl border-2 border-[#CBD5E1] bg-white pl-9 pr-4 text-sm outline-none focus:border-[#E11D48]" />
           </div>
-          <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="h-10 px-3 border-2 border-[#CBD5E1] focus:border-[#E11D48] rounded-xl text-sm outline-none bg-white font-medium">
+          <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="h-10 rounded-xl border-2 border-[#CBD5E1] bg-white px-3 text-sm font-medium outline-none focus:border-[#E11D48]">
             <option value="all">All Roles</option>
             <option value="customer">Customer</option>
             <option value="rider">Rider</option>
             <option value="business">Business</option>
           </select>
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-10 px-3 border-2 border-[#CBD5E1] focus:border-[#E11D48] rounded-xl text-sm outline-none bg-white font-medium">
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-10 rounded-xl border-2 border-[#CBD5E1] bg-white px-3 text-sm font-medium outline-none focus:border-[#E11D48]">
             <option value="all">All Status</option>
             <option value="verified">Verified</option>
             <option value="pending">Pending</option>
           </select>
         </div>
 
-        <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] overflow-hidden">
-          <div className="overflow-x-auto scrollbar-hide">
+        <div className="overflow-hidden rounded-2xl border-2 border-[#E2E8F0] bg-white">
+          <div className="hidden md:block overflow-x-auto scrollbar-hide">
             <table className="w-full">
               <thead>
                 <tr className="border-b-2 border-[#E2E8F0] bg-[#F8F9FA]">
                   {['User', 'Role', 'Status', 'Contact', 'Details', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#64748B]">{h}</th>
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#64748B]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -114,15 +113,15 @@ export default function AdminUsers() {
                   const canEdit = canEditUser(u)
                   const isEditing = editId === u.id
                   return (
-                    <tr key={u.id} className="hover:bg-[#F8F9FA] transition-colors">
+                    <tr key={u.id} className="transition-colors hover:bg-[#F8F9FA]">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${u.role === 'customer' ? 'bg-[#10B981]' : u.role === 'rider' ? 'bg-[#3B82F6]' : u.role === 'business' ? 'bg-[#9333EA]' : 'bg-[#64748B]'}`}>
+                          <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white ${u.role === 'customer' ? 'bg-[#10B981]' : u.role === 'rider' ? 'bg-[#3B82F6]' : u.role === 'business' ? 'bg-[#9333EA]' : 'bg-[#64748B]'}`}>
                             {u.first_name[0]}{u.last_name[0]}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-[#121212] text-sm truncate">{u.first_name} {u.last_name}</p>
-                            <p className="text-[#64748B] text-xs truncate max-w-[160px]">{u.email}</p>
+                            <p className="truncate text-sm font-semibold text-[#121212]">{u.first_name} {u.last_name}</p>
+                            <p className="max-w-[160px] truncate text-xs text-[#64748B]">{u.email}</p>
                           </div>
                         </div>
                       </td>
@@ -131,12 +130,12 @@ export default function AdminUsers() {
                           <select
                             value={editRole}
                             onChange={e => setEditRole(e.target.value as Role)}
-                            className="border-2 border-[#E11D48] rounded-lg px-2 py-1 text-xs font-semibold outline-none"
+                            className="rounded-lg border-2 border-[#E11D48] px-2 py-1 text-xs font-semibold outline-none"
                           >
                             {getRoleOptions().map(r => <option key={r} value={r}>{r}</option>)}
                           </select>
                         ) : (
-                          <span className={`text-xs font-bold px-2 py-1 rounded-full capitalize ${ROLE_COLORS[u.role] || ''}`}>{u.role}</span>
+                          <span className={`rounded-full px-2 py-1 text-xs font-bold capitalize ${ROLE_COLORS[u.role] || ''}`}>{u.role}</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -149,9 +148,9 @@ export default function AdminUsers() {
                         <p className="text-sm font-medium text-[#121212]">{u.phone}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-xs text-[#64748B] space-y-0.5">
+                        <div className="space-y-0.5 text-xs text-[#64748B]">
                           {u.toda_plate && <p>🏍 {u.toda_plate}</p>}
-                          {u.address && <p className="truncate max-w-[120px]">📍 {u.address}</p>}
+                          {u.address && <p className="max-w-[120px] truncate">📍 {u.address}</p>}
                           {u.terminal_name && <p>🚏 {u.terminal_name}</p>}
                         </div>
                       </td>
@@ -159,10 +158,10 @@ export default function AdminUsers() {
                         <div className="flex items-center gap-1.5">
                           {isEditing ? (
                             <>
-                              <button onClick={() => saveEdit(u.id)} className="w-7 h-7 bg-[#10B981] rounded-lg flex items-center justify-center active:scale-90" title="Save">
+                              <button onClick={() => saveEdit(u.id)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#10B981] active:scale-90" title="Save">
                                 <Save size={13} className="text-white" />
                               </button>
-                              <button onClick={() => setEditId(null)} className="w-7 h-7 bg-[#F8F9FA] border-2 border-[#E2E8F0] rounded-lg flex items-center justify-center active:scale-90" title="Cancel">
+                              <button onClick={() => setEditId(null)} className="flex h-7 w-7 items-center justify-center rounded-lg border-2 border-[#E2E8F0] bg-[#F8F9FA] active:scale-90" title="Cancel">
                                 <X size={13} className="text-[#64748B]" />
                               </button>
                             </>
@@ -171,7 +170,7 @@ export default function AdminUsers() {
                               <button
                                 onClick={() => canEdit && startEdit(u)}
                                 disabled={!canEdit}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${canEdit ? 'bg-[#DBEAFE] hover:bg-blue-200' : 'opacity-40 cursor-not-allowed bg-[#F8F9FA]'}`}
+                                className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all active:scale-90 ${canEdit ? 'bg-[#DBEAFE] hover:bg-blue-200' : 'cursor-not-allowed bg-[#F8F9FA] opacity-40'}`}
                                 title={canEdit ? 'Edit role' : blockedReason(u)}
                               >
                                 <Edit2 size={13} className={canEdit ? 'text-[#3B82F6]' : 'text-[#CBD5E1]'} />
@@ -179,7 +178,7 @@ export default function AdminUsers() {
                               <button
                                 onClick={() => canEdit && toggleVerify(u.id)}
                                 disabled={!canEdit}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${canEdit ? 'bg-[#D1FAE5] hover:bg-green-200' : 'opacity-40 cursor-not-allowed bg-[#F8F9FA]'}`}
+                                className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all active:scale-90 ${canEdit ? 'bg-[#D1FAE5] hover:bg-green-200' : 'cursor-not-allowed bg-[#F8F9FA] opacity-40'}`}
                                 title={canEdit ? (u.is_verified ? 'Unverify' : 'Verify') : blockedReason(u)}
                               >
                                 <CheckCircle size={13} className={canEdit ? 'text-[#10B981]' : 'text-[#CBD5E1]'} />
@@ -187,7 +186,7 @@ export default function AdminUsers() {
                               <button
                                 onClick={() => canEdit && deleteUser(u.id)}
                                 disabled={!canEdit}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${canEdit ? 'bg-red-50 hover:bg-red-100' : 'opacity-40 cursor-not-allowed bg-[#F8F9FA]'}`}
+                                className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all active:scale-90 ${canEdit ? 'bg-red-50 hover:bg-red-100' : 'cursor-not-allowed bg-[#F8F9FA] opacity-40'}`}
                                 title={canEdit ? 'Delete' : blockedReason(u)}
                               >
                                 <Trash2 size={13} className={canEdit ? 'text-[#EF4444]' : 'text-[#CBD5E1]'} />
@@ -201,13 +200,73 @@ export default function AdminUsers() {
                 })}
               </tbody>
             </table>
-            {filtered.length === 0 && (
-              <div className="text-center py-12">
-                <Search size={32} className="text-[#CBD5E1] mx-auto mb-2" />
-                <p className="text-[#64748B] font-medium">No users found</p>
-              </div>
-            )}
           </div>
+
+          <div className="space-y-3 p-3 md:hidden">
+            {filtered.map(u => {
+              const canEdit = canEditUser(u)
+              const isEditing = editId === u.id
+              return (
+                <div key={u.id} className="rounded-2xl border border-[#E2E8F0] bg-[#F8F9FA] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white ${u.role === 'customer' ? 'bg-[#10B981]' : u.role === 'rider' ? 'bg-[#3B82F6]' : u.role === 'business' ? 'bg-[#9333EA]' : 'bg-[#64748B]'}`}>
+                        {u.first_name[0]}{u.last_name[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#121212]">{u.first_name} {u.last_name}</p>
+                        <p className="truncate text-xs text-[#64748B]">{u.email}</p>
+                      </div>
+                    </div>
+                    <span className={`rounded-full px-2 py-1 text-xs font-bold capitalize ${ROLE_COLORS[u.role] || ''}`}>{u.role}</span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+                    {u.is_verified
+                      ? <span className="flex items-center gap-1 font-semibold text-[#10B981]"><CheckCircle size={12} />Verified</span>
+                      : <span className="flex items-center gap-1 font-semibold text-[#F59E0B]"><Clock size={12} />Pending</span>
+                    }
+                    <span className="font-medium text-[#121212]">{u.phone}</span>
+                  </div>
+                  <div className="mt-3 space-y-1 text-xs text-[#64748B]">
+                    {u.toda_plate && <p>🏍 {u.toda_plate}</p>}
+                    {u.address && <p className="truncate">📍 {u.address}</p>}
+                    {u.terminal_name && <p>🚏 {u.terminal_name}</p>}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {isEditing ? (
+                      <>
+                        <button onClick={() => saveEdit(u.id)} className="flex h-9 items-center justify-center rounded-lg bg-[#10B981] px-3 text-sm font-semibold text-white">
+                          <Save size={14} className="mr-1" /> Save
+                        </button>
+                        <button onClick={() => setEditId(null)} className="flex h-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-[#64748B]">
+                          <X size={14} className="mr-1" /> Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => canEdit && startEdit(u)} disabled={!canEdit} className={`flex h-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${canEdit ? 'bg-[#DBEAFE] text-[#3B82F6]' : 'cursor-not-allowed bg-[#E2E8F0] text-[#94A3B8]'}`}>
+                          <Edit2 size={14} className="mr-1" /> Edit
+                        </button>
+                        <button onClick={() => canEdit && toggleVerify(u.id)} disabled={!canEdit} className={`flex h-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${canEdit ? 'bg-[#D1FAE5] text-[#10B981]' : 'cursor-not-allowed bg-[#E2E8F0] text-[#94A3B8]'}`}>
+                          <CheckCircle size={14} className="mr-1" /> {u.is_verified ? 'Unverify' : 'Verify'}
+                        </button>
+                        <button onClick={() => canEdit && deleteUser(u.id)} disabled={!canEdit} className={`flex h-9 items-center justify-center rounded-lg px-3 text-sm font-semibold ${canEdit ? 'bg-red-50 text-[#EF4444]' : 'cursor-not-allowed bg-[#E2E8F0] text-[#94A3B8]'}`}>
+                          <Trash2 size={14} className="mr-1" /> Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="py-12 text-center">
+              <Search size={32} className="mx-auto mb-2 text-[#CBD5E1]" />
+              <p className="font-medium text-[#64748B]">No users found</p>
+            </div>
+          )}
         </div>
       </main>
     </div>

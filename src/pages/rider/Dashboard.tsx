@@ -6,6 +6,22 @@ import { getCurrentUser, getActiveRide, setActiveRide, getRideHistory, addRideTo
 
 const SERVICE_TYPES = ['Ride Share', 'Delivery', 'Private']
 
+function isRideService(service: string) {
+  return service === 'Ride Share' || service === 'Private'
+}
+
+function matchesServiceSelection(services: string[], requestType: string) {
+  if (services.includes('Delivery')) {
+    return requestType === 'delivery'
+  }
+
+  const rideServices = services.filter(isRideService)
+  if (rideServices.length === 0) return false
+  if (requestType === 'share') return rideServices.includes('Ride Share')
+  if (requestType === 'private') return rideServices.includes('Private')
+  return false
+}
+
 export default function RiderDashboard() {
   const navigate = useNavigate()
   // Stable reference — getCurrentUser() returns a new object each call, which would
@@ -36,10 +52,7 @@ export default function RiderDashboard() {
   // next matching request after a short countdown so the driver can cancel.
   useEffect(() => {
     if (!autoAccept || !online || activeRide || !user) return
-    const matches = (t: string) => services.some(s =>
-      (t === 'share' && s === 'Ride Share') ||
-      (t === 'delivery' && s === 'Delivery') ||
-      (t === 'private' && s === 'Private'))
+    const matches = (t: string) => matchesServiceSelection(services, t)
     const next = getRideRequests().find(r =>
       r.terminalId === (user.terminal_id ?? 't1') && matches(r.type))
     if (!next) return
@@ -94,7 +107,25 @@ export default function RiderDashboard() {
   const pendingCount = requests.filter(r => r.terminalId === (user?.terminal_id ?? 't1')).length
 
   function toggleService(s: string) {
-    setServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+    setServices(prev => {
+      if (s === 'Delivery') {
+        return prev.includes('Delivery') ? [] : ['Delivery']
+      }
+
+      if (prev.includes('Delivery')) {
+        return prev.includes(s) ? [] : [s]
+      }
+
+      if (prev.includes(s)) {
+        return prev.filter(x => x !== s)
+      }
+
+      if (prev.includes('Ride Share') || prev.includes('Private')) {
+        return [...prev, s]
+      }
+
+      return [s]
+    })
   }
 
   function completeTrip() {
@@ -264,7 +295,7 @@ export default function RiderDashboard() {
                 <X size={14} className="text-[#64748B]" />
               </button>
             </div>
-            <p className="text-xs text-[#64748B] mb-3">Select which service types you want to accept</p>
+            <p className="text-xs text-[#64748B] mb-3">Choose ride-based services or delivery, but not both at the same time.</p>
             <div className="space-y-2">
               {SERVICE_TYPES.map(s => (
                 <button

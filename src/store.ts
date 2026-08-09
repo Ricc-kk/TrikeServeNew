@@ -106,6 +106,7 @@ const KEY_ACTIVE_RIDE = 'trikeserve_active_ride'
 const KEY_HISTORY_PREFIX = 'ride_history_'
 const KEY_ORDERS = 'trikeserve_orders'
 const KEY_RESTAURANT_MENU = 'trikeserve_restaurant_menu'
+const KEY_STORE_STATUS = 'trikeserve_store_status'
 
 // --------------------------------------------------------------------------
 // Food orders + delivery dispatch (GrabFood-style pipeline)
@@ -146,6 +147,10 @@ export interface Order {
   createdAt: string
 }
 
+export interface StoreStatus {
+  isOpen: boolean
+}
+
 const minutesAgo = (n: number) => new Date(Date.now() - n * 60_000).toISOString()
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString()
 
@@ -182,6 +187,30 @@ export function saveRestaurantMenuItems(restaurantId: string, items: MenuItem[])
   localStorage.setItem(KEY_RESTAURANT_MENU, value)
   notifyStorage(KEY_RESTAURANT_MENU, value)
   window.dispatchEvent(new CustomEvent('menu-items-updated', { detail: { restaurantId, items } }))
+}
+
+export function getStoreStatus(restaurantId: string): StoreStatus {
+  const raw = localStorage.getItem(KEY_STORE_STATUS)
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as Record<string, StoreStatus>
+      if (parsed[restaurantId]) return parsed[restaurantId]
+    } catch { /* fall through */ }
+  }
+  return { isOpen: true }
+}
+
+export function saveStoreStatus(restaurantId: string, status: StoreStatus) {
+  let parsed: Record<string, StoreStatus> = {}
+  const raw = localStorage.getItem(KEY_STORE_STATUS)
+  if (raw) {
+    try { parsed = JSON.parse(raw) as Record<string, StoreStatus> } catch { parsed = {} }
+  }
+  parsed[restaurantId] = status
+  const value = JSON.stringify(parsed)
+  localStorage.setItem(KEY_STORE_STATUS, value)
+  notifyStorage(KEY_STORE_STATUS, value)
+  window.dispatchEvent(new CustomEvent('store-status-updated', { detail: { restaurantId, status } }))
 }
 
 const SEED_ORDERS: Order[] = [

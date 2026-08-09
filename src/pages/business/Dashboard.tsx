@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Store, ShoppingBag, Plus, ToggleLeft, ToggleRight, Star, CheckCircle, Package, LogOut, Edit2, Trash2, X, Bike, Clock } from 'lucide-react'
 import Header from '../../components/Header'
-import { getCurrentUser, setCurrentUser, getOrders, updateOrderStatus, dispatchDeliveryOrder, getRestaurantMenuItems, saveRestaurantMenuItems, type Order, type OrderStatus, type MenuItem, type MenuBadge } from '../../store'
+import { getCurrentUser, setCurrentUser, getOrders, updateOrderStatus, dispatchDeliveryOrder, getRestaurantMenuItems, saveRestaurantMenuItems, getStoreStatus, saveStoreStatus, type Order, type OrderStatus, type MenuItem, type MenuBadge } from '../../store'
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   received: 'Received', confirmed: 'Confirmed', preparing: 'Preparing',
@@ -46,6 +46,7 @@ export default function BusinessDashboard() {
   const [tab, setTab] = useState<Tab>('overview')
   const [orders, setOrders] = useState<Order[]>(getOrders)
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => getRestaurantMenuItems('r1'))
+  const [storeStatus, setStoreStatus] = useState(() => getStoreStatus('r1').isOpen)
   const [showMenuForm, setShowMenuForm] = useState(false)
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [menuForm, setMenuForm] = useState<MenuForm>(EMPTY_MENU_FORM)
@@ -136,6 +137,12 @@ export default function BusinessDashboard() {
 
   function logout() { setCurrentUser(null); navigate('/') }
 
+  function toggleStoreAvailability() {
+    const next = !storeStatus
+    setStoreStatus(next)
+    saveStoreStatus('r1', { isOpen: next })
+  }
+
   const activeOrders = orders.filter(o => o.status !== 'delivered')
   const todayRevenue = orders.filter(o => o.status === 'delivered').reduce((s, o) => s + o.total, 0)
 
@@ -157,11 +164,12 @@ export default function BusinessDashboard() {
           <div className="flex items-center gap-2 mt-1">
             <span className="flex items-center gap-1 text-xs text-[#64748B]"><Star size={11} className="fill-[#F59E0B] text-[#F59E0B]" />4.8</span>
             <span className="text-xs text-[#64748B]">•</span>
-            <span className="text-xs text-[#10B981] font-semibold">● Open</span>
+            <span className={`text-xs font-semibold ${storeStatus ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>{storeStatus ? '● Open' : '● Closed'}</span>
           </div>
         </div>
-        <button className="w-9 h-9 border-2 border-[#E2E8F0] rounded-xl flex items-center justify-center">
-          <Edit2 size={15} className="text-[#64748B]" />
+        <button onClick={toggleStoreAvailability} className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-all active:scale-95 ${storeStatus ? 'bg-[#D1FAE5] text-[#10B981]' : 'bg-[#FEE2E2] text-[#EF4444]'}`}>
+          <span className="text-xs">{storeStatus ? 'Online' : 'Offline'}</span>
+          <span className={`h-2.5 w-2.5 rounded-full ${storeStatus ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`} />
         </button>
       </div>
 

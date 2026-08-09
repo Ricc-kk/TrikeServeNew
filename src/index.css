@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-primary: #E11D48;
+  --color-primary-dark: #BE123C;
+  --color-charcoal: #121212;
+  --color-silver: #CBD5E1;
+  --color-paper: #FFFFFF;
+  --color-grey: #64748B;
+  --color-light-bg: #F8F9FA;
+  --color-border-soft: #E2E8F0;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-blue: #3B82F6;
+  --color-purple: #9333EA;
+}
+
+html, body, #root {
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+  background-color: #F8F9FA;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes infiniteBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-slide-down { animation: slideDown 0.3s ease-out; }
+.animate-slide-up { animation: slideUp 0.3s ease-out; }
+.animate-infinite-bounce { animation: infiniteBounce 1.2s ease-in-out infinite; }
